@@ -1,0 +1,6 @@
+dashscope
+websocket-client
+sounddevice
+numpy
+python-dotenv
+PySide6
