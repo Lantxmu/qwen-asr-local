@@ -59,7 +59,7 @@ pip install -r requirements.txt
 DASHSCOPE_API_KEY=your_api_key_here
 ```
 
-程序会在运行时自动加载该环境变量；GUI 中也可以录入并保存 API Key。不要将包含真实密钥的 `.env` 文件提交到 GitHub。
+程序会在运行时自动加载该环境变量；GUI 中也可以录入并保存 API Key。
 
 ## 启动方式
 
@@ -128,7 +128,3 @@ transcripts/2026-09-26_18-34-43.md
 - `numpy`
 - `python-dotenv`
 - `PySide6`
-
-## 说明
-
-本项目主要面向“实时字幕 / 实时转写 / 本地语音识别演示”场景，尤其适合会议、直播、口播或辅助字幕场景使用。
