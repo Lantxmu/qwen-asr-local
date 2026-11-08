@@ -1,0 +1,2 @@
+# Optional, isolated from the ASR application's dependencies.
+mcp>=1.12,<2

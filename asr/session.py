@@ -10,6 +10,7 @@ import websocket
 from audio.capture import iter_audio_frames
 from asr.client import load_api_key, receive_asr_events, send_finish_task, start_qwen_task
 from asr.segment import TranscriptState
+from diagnostics import log_event, log_exception
 from output.transcript import display_asr_event
 
 
@@ -40,6 +41,7 @@ def run_realtime_asr(
 	finish_received = False
 
 	def report_status(kind: str, message: str) -> None:
+		log_event("asr_status", kind=kind)
 		if on_status is not None:
 			on_status(kind, message)
 		elif message:
@@ -48,8 +50,14 @@ def run_realtime_asr(
 	def handle_event(server_event: dict[str, object]) -> bool:
 		if on_event is not None:
 			on_event(server_event)
-			return server_event.get("header", {}).get("event") in {"task-failed", "client-error"}
-		return display_asr_event(server_event, api_key, transcript_state)
+			event_name = server_event.get("header", {}).get("event")
+			failed = event_name in {"task-failed", "client-error"}
+		else:
+			event_name = server_event.get("header", {}).get("event")
+			failed = display_asr_event(server_event, api_key, transcript_state)
+		if failed:
+			log_event("qwen_server_failure", server_event=event_name)
+		return failed
 
 	try:
 		connection, task_id = start_qwen_task(api_key)
@@ -78,6 +86,7 @@ def run_realtime_asr(
 				break
 	except Exception as error:
 		message = str(error).replace(api_key, "[REDACTED]")
+		log_exception("asr_session_exception", error, redact=api_key)
 		report_status("error", f"{type(error).__name__}: {message}")
 		task_failed = True
 	finally:
@@ -103,6 +112,7 @@ def run_realtime_asr(
 							break
 				except Exception as error:
 					message = str(error).replace(api_key, "[REDACTED]")
+					log_exception("asr_shutdown_exception", error, redact=api_key)
 					report_status("error", f"Shutdown {type(error).__name__}: {message}")
 				if not finish_received and not task_failed:
 					report_status("error", "Qwen task did not confirm task-finished.")

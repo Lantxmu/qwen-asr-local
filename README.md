@@ -11,6 +11,7 @@
 - 支持终端实时输出识别结果
 - 支持自动保存最终识别文本到 Markdown 文件
 - 支持测试 Qwen 连接状态与麦克风状态
+- 自动记录程序事件、Python/Qt 异常和原生崩溃堆栈
 
 ## 项目结构
 
@@ -53,13 +54,13 @@ pip install -r requirements.txt
 
 ## 配置 API Key
 
-在`env`中填入自己的 API Key：
+复制 `.env.example` 为 `.env`，然后填入自己的 API Key：
 
 ```env
 DASHSCOPE_API_KEY=your_api_key_here
 ```
 
-程序会在运行时自动加载该环境变量；GUI 中也可以录入并保存 API Key。
+程序会在运行时自动加载该环境变量；GUI 中也可以录入并保存 API Key。不要将包含真实密钥的 `.env` 文件提交到 GitHub。
 
 ## 启动方式
 
@@ -120,6 +121,12 @@ transcripts/2026-09-26_18-34-43.md
 - Windows 下可能需要 PortAudio 相关音频支持；若出现麦克风初始化失败，请检查录音设备和驱动。
 - GUI 功能依赖 PySide6；终端模式不依赖界面。
 
+## 诊断日志
+
+程序会将轮转日志写入用户数据目录：Windows 为 `%LOCALAPPDATA%\QwenASRLocal\logs`，其他平台优先使用 `$XDG_STATE_HOME/QwenASRLocal/logs`，否则使用 `~/.local/state/QwenASRLocal/logs`。`application.log` 包含启动、GUI/识别线程生命周期、Qt 消息和未捕获异常；`crash.log` 由 Python `faulthandler` 记录原生崩溃时可获得的线程堆栈。若用户数据目录不可写，会回退到系统临时目录下的 `QwenASRLocal/logs`。
+
+日志不记录识别音频或转写正文。进程被强制结束、断电，或操作系统/驱动直接终止进程时，仍可能来不及写入日志；原生堆栈也取决于崩溃类型。
+
 ## 依赖列表
 
 - `dashscope`
@@ -128,3 +135,11 @@ transcripts/2026-09-26_18-34-43.md
 - `numpy`
 - `python-dotenv`
 - `PySide6`
+
+## ChatGPT 接入（可选）
+
+新增独立只读 MCP 桥接 `chatgpt_bridge.py`，可按需读取一份明确指定的 GUI 转写归档及后续新增内容。完整架构分析、启动步骤、ChatGPT 连接要求与自动跟进路径见 [CHATGPT_INTEGRATION.md](CHATGPT_INTEGRATION.md)。本地桥接不代表已连接 ChatGPT，也不会自动触发总结。
+
+## 使用场景
+
+本项目主要面向“实时字幕 / 实时转写 / 本地语音识别演示”场景，尤其适合会议、直播、口播或辅助字幕场景使用。

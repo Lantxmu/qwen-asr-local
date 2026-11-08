@@ -1,5 +1,9 @@
 import argparse
 
+from diagnostics import install_diagnostics, log_event
+
+install_diagnostics()
+
 import sounddevice as sd
 
 from audio.capture import capture_audio
@@ -31,6 +35,10 @@ def main() -> int:
 		help="stop console recognition after this many seconds",
 	)
 	args = parser.parse_args()
+	log_event(
+		"application_start",
+		mode="gui" if not args.console and args.duration_seconds is None else "console",
+	)
 
 	if args.test_qwen_connection:
 		return test_qwen_connection()

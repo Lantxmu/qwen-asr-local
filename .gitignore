@@ -5,3 +5,33 @@
 __pycache__/
 *.py[cod]
 transcripts/
+outputs/
+# Local diagnostics and recordings
+*.log
+logs/
+*.wav
+*.mp3
+*.m4a
+*.flac
+*.pcm
+
+# Credentials and local configuration
+*.pem
+*.key
+credentials*.json
+secrets*.json
+.env-directory-placeholder/
+.gigignore/
+.vscode/
+.idea/
+
+# Tool caches and build outputs
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+build/
+dist/
+*.egg-info/
+Thumbs.db
+.DS_Store
+.test-tmp/
